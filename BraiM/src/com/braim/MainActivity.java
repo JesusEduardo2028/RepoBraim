@@ -5,8 +5,10 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -640,13 +642,34 @@ public class MainActivity extends BaseActivity  {
 				startActivity(i);
 				
 			}else{
-				Toast.makeText(this, "no puede entrenar sin estar conectado con el servidor de procesamiento", Toast.LENGTH_LONG).show();
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			      builder.setMessage("Debes seleccionar un dispositivo para el procesamiento de señales");
+			      builder.setCancelable(false);
+			      builder.setPositiveButton("Configurar",
+			              new DialogInterface.OnClickListener() {
+			                  public void onClick(DialogInterface dialog, int id) {
+			                   
+			                		conectionJavaProcesor();
+			                  }
+			              });
+			      builder.setNegativeButton("Cancelar",
+			              new DialogInterface.OnClickListener() {
+			                  public void onClick(DialogInterface dialog, int id) {
+			                      dialog.cancel();
+			                  }
+			              });
+			      AlertDialog alertDialog = builder.create();
+			      alertDialog.show();
+		        
+		                    }
+			//	Toast.makeText(this, "no puede entrenar sin estar conectado con el servidor de procesamiento", Toast.LENGTH_LONG).show();
 		
 			} 
 			
-		}
+	
 
-		
+
 		@Override
 		protected void onActivityResult(int arg0, int arg1, Intent arg2) {
 			// TODO Auto-generated method stub

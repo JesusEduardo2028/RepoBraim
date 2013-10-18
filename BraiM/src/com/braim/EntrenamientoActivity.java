@@ -178,16 +178,26 @@ public class EntrenamientoActivity extends Activity implements InterfazEntrenami
 	                    Toast.LENGTH_SHORT).show();
 	        HttpActivity.s.Snd_txt_Msg("cancel");  
 	        
-	        Handler handler = new Handler();
-	        handler.postDelayed(new Runnable() {
-	            public void run() {
-	                // acciones que se ejecutan tras los milisegundos
-	          //  	HttpActivity.s.Disconnect();
-	    	   //     HttpActivity.s.conectStatus = false;
-	    	    //    conexion= false;
-	            }
-	        }, 3000);
-	        
+	        AlertDialog.Builder builder = new AlertDialog.Builder(EntrenamientoActivity.this);
+		      builder.setMessage("Tiempo de espera Excedido");
+		      builder.setCancelable(false);
+		      builder.setPositiveButton("Reintentar",
+		              new DialogInterface.OnClickListener() {
+		                  public void onClick(DialogInterface dialog, int id) {
+		                		mensaje.show();
+		                		tarea = new MiTareaAsincrona();
+			          			tarea.execute();
+			          			boton_iniciar.setEnabled(false);
+		                  }
+		              });
+		      builder.setNegativeButton("Cancelar",
+		              new DialogInterface.OnClickListener() {
+		                  public void onClick(DialogInterface dialog, int id) {
+		                      dialog.cancel();
+		                  }
+		              });
+		      AlertDialog alertDialog = builder.create();
+		      alertDialog.show();
 	        
 	                    }
 	        
