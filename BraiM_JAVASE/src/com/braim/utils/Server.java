@@ -38,9 +38,12 @@ public class Server {
 			TimeStamp = new java.util.Date().toString();
 
 			try {
+			
 				// Creamos socket para manejar conexion con cliente
 				skCliente = skServidor.accept(); // esperamos al cliente
 				// una vez q se conecto obtenemos la ip
+				
+				MainGui.ponerEstado(0);
 				IP_client = skCliente.getInetAddress().toString();
 
 				System.out.println("[" + TimeStamp + "] Conectado al cliente "
@@ -50,6 +53,7 @@ public class Server {
 				// s = new Sender(IP_client, 5550);
 				// MainGui.crearCliente(sk);
 				while (true) {
+					
 					// Manejamos flujo de Entrada
 					ObjectInputStream ois = new ObjectInputStream(
 							skCliente.getInputStream());
