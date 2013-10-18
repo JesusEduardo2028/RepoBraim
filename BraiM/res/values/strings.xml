@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Braim Mobile</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="login_activity">Login</string>
+    <string name="search_artist_activity">Search artists</string>
+    <string name="show_album_activity">Show albums</string>
+    <string name="show_radio_activity">Show radios</string>
+    <string name="show_track_activity">Show tracks</string>
+    <string name="show_playlist_activity">Show playlists</string>
+    <string name="home_activity">Home</string>
+    <string name="authorize">Deezer login</string>
+    <string name="logout">Click to logout (locally)</string>
+    <string name="loggedout">You have been logged out</string>
+    <string name="testlib">Test C lib</string>
+    <string name="play_track">Play random track</string>
+    <string name="desc_album_thumb">Album cover</string>
+    <string name="desc_artist_thumb">Artist picture</string>
+    <string name="empty_artist">Search an artist</string>
+    <string name="empty_radios">No radios available</string>
+    <string name="empty_album">No albums available</string>
+    <string name="empty_playlist">No playlists available</string>
+    <string name="empty_track">No tracks available</string>
+    <string name="user_authentified">User authentified</string>
+    <string name="invalid_credentials">Invalid credentials</string>
+    <string name="login_cancelled">Login cancelled</string>
+    <string name="deezer_error_during_login">Deezer error during login</string>
+    <string name="name">Name</string>
+    <string name="first_name">First name</string>
+    <string name="birthday">Birthday</string>
+    <string name="empty">Search an artist</string>
+    <string name="artist_search">Search an artist</string>
+    <string name="artist_search_hint">Enter artist name &#8230;</string>
+    <string name="download_error">Error during search, retry later please.</string>
+    <string name="player_error">Error during playback.</string>
+    <string name="lookup_error">Error during artist lookup, retry later please.</string>
+    <string name="no_result">No artist matched your query.</string>
+    <string name="show_album">Simply Deezer::select a tune.</string>
+    <string name="tracks">track(s)</string>
+    <string name="disks">disk(s)</string>
+    <string name="year">Year:</string>
+    <string name="default_duration">0:00</string>
+    <string name="desc_skip_to_previous_track">skip to previous track</string>
+    <string name="desc_skip_to_next_track">skip to next track</string>
+    <string name="desc_seek_forward_in_current_track">seek forward in current track</string>
+    <string name="desc_start_current_track">start current track</string>
+    <string name="desc_stop_current_track">stop current track</string>
+    <string name="desc_seek_backward_in_current_track">seek backward in current track</string>
+    <string name="desc_sample_app_logo">Sample app logo</string>
+    <string name="desc_user_avatar">User avatar</string>
+    <string name="desc_cover">Cover</string>
+
+    <string-array name="buttons_array">
+        <item>My playlists</item>
+        <item>Search an artist</item>
+        <item>Browse radios</item>
+    </string-array>
+
+    <string name="unloggedradio">Radios without connection</string>
+    <string name="refresh_pull_down">Pull down to refresh…</string>
+    <string name="refresh_release">Release to refresh…</string>
+    <string name="loading">Loading…</string>
+    <string name="refresh_pull_up">Pull up to refresh…</string>
+    <string name="title_activity_configuration">Configuracion Bluetooth</string>
+    <string name="title_activity_entrenamiento">EntrenamientoActivity</string>
+    <string name="title_activity_http">HttpActivity</string>
+
+</resources>

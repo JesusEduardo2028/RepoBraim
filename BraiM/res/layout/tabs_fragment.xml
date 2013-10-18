@@ -1,0 +1,40 @@
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tabhost"			
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" > <!--El tabHots debe asignarse con el id @android:id/tabhost  -->
+
+    <LinearLayout							
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >       <!-- Este linear layout contiene el tabwidget y el framelayout -->
+
+        <TabWidget								
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" 
+            android:visibility="gone"/>  <!-- El tabwidget contiene las pestañas del tabhost  -->
+
+        <FrameLayout								
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >     <!-- Frame layout muestra el contenido dentro de la ficha  -->
+
+
+
+	   <include layout="@layout/container_main"/>	<!-- Segunda ficha asignada con el id tab2Layout UTILIZANDO ICLUDE PODEMOS USAR OTRO LAYOUT-->
+
+   <include layout="@layout/listas_amigos"/>
+
+		<!-- <fragment 
+ 	  	 class = "com.example.pruebasherlock.fragments.AmigosFragment"
+  		  android:id="@+id/tab3Layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    />
+		 -->
+           
+        </FrameLayout>
+    </LinearLayout>
+
+</TabHost>

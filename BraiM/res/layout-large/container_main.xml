@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+   	android:id="@+id/tab2Layout">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:weightSum="2">
+
+        <ImageButton
+            android:id="@+id/imageButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_default"
+            android:layout_weight="1" 
+           
+            />
+
+
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_default"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/contenedorListas" >
+        
+       <!-- <fragment 
+  		class = "com.unicauca.fragments.ListasFragment"
+  		android:id="@+id/fragmentLista_u"
+     
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    />
+       
+          <fragment 
+   		class = "com.unicauca.fragments.ListasFragmentDeezer"
+  		android:id="@+id/fragmentLista_d"
+     
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    /> -->
+        
+        
+        
+    </FrameLayout>
+
+</LinearLayout>

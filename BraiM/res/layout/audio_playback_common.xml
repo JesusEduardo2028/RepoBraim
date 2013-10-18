@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/abs__background_holo_dark" >
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:layout_marginBottom="1dip"
+        android:background="#ffffffff" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/abs__background_holo_dark"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="4dip" >
+
+        <include layout="@layout/audio_playback_buttons" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/abs__background_holo_dark"
+        android:orientation="horizontal"
+        android:paddingBottom="4dip"
+        android:paddingTop="1dip" >
+
+        <TextView
+            android:id="@+id/text_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:paddingLeft="5dip"
+            android:shadowColor="#ff000000"
+            android:text="@string/default_duration"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <SeekBar
+            android:id="@+id/seek_progress"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:max="100"
+            android:paddingBottom="4dip"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip" 
+            />
+
+        <TextView
+            android:id="@+id/text_length"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:gravity="right"
+            android:paddingRight="5dip"
+            android:shadowColor="#ff000000"
+            android:text="@string/default_duration"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+<!--     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/player_background"
+        android:orientation="vertical"
+        android:paddingBottom="4dip"
+        android:paddingTop="1dip" >
+        <TextView
+            android:id="@+id/text_artist"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:gravity="left"
+            android:shadowColor="#ff000000"
+            android:text="@string/empty"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:ellipsize="marquee"
+            android:textStyle="bold|italic" />
+        <TextView
+            android:id="@+id/text_track"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0"
+            android:gravity="left"
+            android:shadowColor="#ff000000"
+            android:text="@string/empty"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:ellipsize="marquee"
+            android:textStyle="italic" />
+     </LinearLayout> -->
+</LinearLayout>
