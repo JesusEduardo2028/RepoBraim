@@ -38,7 +38,7 @@ import com.braim.fragments.MenuSlideFragment;
 import com.braim.fragments.ProfileFragment;
 import com.braim.fragments.RecomendadorFragment;
 import com.braim.fragments.TrackFragment;
-import com.braim.fragments.ContenedorTabla.myinterfazTabla;
+
 import com.braim.utils.ImageLoader;
 import com.deezer.sdk.AsyncDeezerTask;
 import com.deezer.sdk.DeezerError;
@@ -523,9 +523,6 @@ public class MainActivity extends BaseActivity  {
 			// TODO Auto-generated method stub
 			
 			contenido = nuevoContenido;
-			Bundle args = new Bundle();
-			args.putString("tag_tab", "listas");
-			contenido.setArguments(args);
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, nuevoContenido).commit();
 			getSlidingMenu().showContent();
 			
@@ -534,9 +531,6 @@ public class MainActivity extends BaseActivity  {
 		public void switchContentAmigos(Fragment nuevoContenido) {
 			// TODO Auto-generated method stub
 			contenido = nuevoContenido;
-			Bundle args = new Bundle();
-			args.putString("tag_tab", "amigos");
-			contenido.setArguments(args);
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, nuevoContenido).commit();
 			getSlidingMenu().showContent();
 		}

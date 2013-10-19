@@ -2,7 +2,7 @@ package com.braim.fragments;
 
 
 import com.braim.MainActivity;
-import com.braim.fragments.ContenedorTabla.myinterfazTabla;
+
 import com.example.pruebasherlock.R;
 
 import android.app.Activity;
@@ -56,14 +56,18 @@ public class MenuSlideFragment extends ListFragment{
 			switchFragment(nuevoContenido);break;
 			
 		case 1:
-			nuevoContenido = new ContenedorTabla();
+			nuevoContenido = new SearchFragment();
 			switchFragment(nuevoContenido);break;
 		case 2:
+			nuevoContenido = new ListasFragment();
+			switchFragment_amigos(nuevoContenido);break;
+		case 3:
 			nuevoContenido = new RecomendadorFragment();
 			switchFragment(nuevoContenido);break;
-		case 3:
-			nuevoContenido = new ContenedorTabla();
+		case 4:
+			nuevoContenido = new AmigosFragment();
 			switchFragment_amigos(nuevoContenido);break;
+			
 		}
 	
 		
@@ -141,6 +145,12 @@ public class MenuSlideFragment extends ListFragment{
 				
 				ImageView imagen = (ImageView) convertView.findViewById(R.id.row_icon);
 				imagen.setImageDrawable(getContext().getResources().getDrawable(android.R.drawable.ic_menu_agenda));
+			}else if (getItem(position).tag.equals("buscar")){
+				TextView texto =  (TextView) convertView.findViewById(R.id.row_title);
+				texto.setText("Buscar Musica");
+				
+				ImageView imagen = (ImageView) convertView.findViewById(R.id.row_icon);
+				imagen.setImageDrawable(getContext().getResources().getDrawable(android.R.drawable.ic_menu_search));
 			}
 			
 			return convertView;
@@ -154,6 +164,7 @@ public void onActivityCreated(Bundle savedInstanceState) {
 		SampleAdapter adapter =new SampleAdapter(getActivity());
 		
 		adapter.add(new SampleItem("perfil", android.R.drawable.ic_menu_add));
+		adapter.add(new SampleItem("buscar", android.R.drawable.ic_menu_search));
 		adapter.add(new SampleItem("listas", android.R.drawable.ic_menu_add));
 		adapter.add(new SampleItem("recomendacion",android.R.drawable.ic_input_get));
 		adapter.add(new SampleItem("configuracion", android.R.drawable.ic_menu_preferences));

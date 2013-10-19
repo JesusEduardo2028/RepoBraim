@@ -24,7 +24,7 @@ import android.widget.TabHost.TabSpec;
 
 
 
-public class ContenedorTabla extends Fragment implements OnTabChangeListener {
+public class ContenedorTabla extends Fragment {
 
 	
 	private static final String TAG = "FragmentTabs";
@@ -128,22 +128,6 @@ public class ContenedorTabla extends Fragment implements OnTabChangeListener {
 
 
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onActivityCreated(savedInstanceState);
-		setRetainInstance(true);
-		if(getArguments().getString("tag_tab").equals("amigos")){
-			tabHost.setCurrentTab(1);
-		}else{
-	//	tabHost.setOnTabChangedListener(this);
-		tabHost.setCurrentTab(0);
-		}
-	
-	}
-	public void cambiar_amigosVista (){
-		tabHost.setCurrentTab(1);
-	}
 
 
 
@@ -154,7 +138,7 @@ public class ContenedorTabla extends Fragment implements OnTabChangeListener {
 		
 		tabHost.addTab(newtab(this.TAG_listas,"Listas de Reproduccion",R.id.tab2Layout));
 		tabHost.addTab(newtab(this.TAG_amigos,"Amigos",R.id.tab3Layout));
-		tabHost.setOnTabChangedListener(this);
+
 	}
 
  
@@ -165,51 +149,17 @@ public class ContenedorTabla extends Fragment implements OnTabChangeListener {
 		TabSpec  tabSpec = tabHost.newTabSpec(tag);
 		tabSpec.setIndicator(titulo,null);
 		tabSpec.setContent(idTab);
-		
-		
+				
 		
 		return tabSpec;
 	}
 
 
 
-	@Override
-	public void onTabChanged(String tabID) {
-		// TODO Auto-generated method stub
-	//	Toast.makeText(getActivity(), tabID, Toast.LENGTH_SHORT).show();
-		if (tabID.equals("lista")){
-			
-			 FragmentManager fm = getFragmentManager();
-		       
-		            fm.beginTransaction()
-		                    .replace(R.id.contenedorListas, new ListasFragment()).commit();
-		            
-		       
-		}else {
-			FragmentManager fm = getFragmentManager();
-			fm.beginTransaction().replace(R.id.contenedorAmigos, new AmigosFragment()).commit();
-		}
 		
 		
-	}
-
-
-
-	public interface myinterfazTabla { // Interfaz creada para comunicacion
-		// entre fragment y la actividad
-		// principal
-public void onTAbPresionado(String tabId); // Metodo para llevar el
-			
-}
 	
 
 
-
-
-
-
-
-	
-	
 
 }
