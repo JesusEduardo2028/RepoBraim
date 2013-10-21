@@ -5,8 +5,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +27,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.braim.deezer.data.Playlist;
+import com.braim.deezer.data.Album;
+import com.braim.deezer.data.Artist;
 import com.braim.deezer.data.Thumbnailable;
 import com.braim.deezer.data.Track;
 import com.braim.deezer.data.User;
@@ -34,11 +36,15 @@ import com.braim.deezer.io.DeezerDataReader;
 import com.braim.deezer.io.ListDeezerDataReader;
 import com.braim.deezer.ui.ThumbFetcher;
 import com.braim.deezer.ui.event.ThumbFetcherListener;
+import com.braim.fragments.AlbumFragment;
+import com.braim.fragments.AlbumFragment.InterfazBusquedaCanciones;
+import com.braim.fragments.ArtistaFragment;
+import com.braim.fragments.ArtistaFragment.InterfazBusquedaListas;
 import com.braim.fragments.MenuSlideFragment;
 import com.braim.fragments.ProfileFragment;
-import com.braim.fragments.RecomendadorFragment;
+import com.braim.fragments.TrackAlbumFragment;
+import com.braim.fragments.SearchFragment.InterfazBusquedaArtsita;
 import com.braim.fragments.TrackFragment;
-
 import com.braim.utils.ImageLoader;
 import com.deezer.sdk.AsyncDeezerTask;
 import com.deezer.sdk.DeezerError;
@@ -48,7 +54,7 @@ import com.deezer.sdk.RequestListener;
 import com.deezer.sdk.SessionStore;
 import com.example.pruebasherlock.R;
 
-public class MainActivity extends BaseActivity  {
+public class MainActivity extends BaseActivity  implements InterfazBusquedaArtsita, InterfazBusquedaListas, InterfazBusquedaCanciones{
 	
 	private Fragment contenido;
 	
@@ -67,33 +73,50 @@ public class MainActivity extends BaseActivity  {
 	//declaracion callback consultar playlist
 		private  RequestListener playlistRequestListenerHAndler = new PlayListRequestHandler();
 	//Objeto para gestionar las miniatiras de las fotos de las Playlist	
-		private ThumbNailFletcherHAndler_PLayList thumbFletcher_PLaylist;		
-		public static List<Playlist> listPlaylist =  new ArrayList<Playlist>();
-		public static  ArrayAdapter<Playlist> arrayAdapterPlayList = null; 
+	
+		public static List<Album> listPlaylist =  new ArrayList<Album>();
+		public static  ArrayAdapter<Album> arrayAdapterPlayList = null; 
 		
 		
 		//declaracion callback consultar amigos 
 		private RequestListener userlistRequestListenerHandler = new UserListRequestHandler();
 		public static List<User> listUsers = new  ArrayList<User>();
 		//Objeto para gestionar las miniaturas de las fotos de los amigos en Deezer
-		private ThumbNailFletcherHandler_Users thumbFlether_Users;
+	
 		public static ArrayAdapter<User> arrayAdapterUsers = null;
 		
 		//declaracion callback consultar lista canciones
 		
-		private RequestListener trackRequesListenertHandler = new trackRequestHandler();
-		private List<Track> listTrack = new ArrayList<Track>();
+		private RequestListener trackRequesListenertHandler_recommendation = new trackRequestHandler();
+		private List<Track> listTrack_recommendation = new ArrayList<Track>();
 
 
 		private long  playlistId = 4341978;
 
 
+		public static ArrayAdapter<Artist> arrayAdapterArtist;
+		public static  List<Artist> listArtist = new ArrayList<Artist>();
+		private  RequestListener artistSearchRequestHandler = new ArtistSearchRequestHandler();
+
+
+		private AlertDialog mensaje;
+
+		private static MainActivity a;
+
+
 		public static boolean conexion =false;
 		protected static boolean conexionExitosa;
-		public static ArrayAdapter<Track>  arrayAdapterTrack = null;
+		public static ArrayAdapter<Track>  arrayAdapterTrack_recommendation = null;
 		
 		
-		
+		private RequestListener trackLookupRequestHandler = new TrackLookupRequestHandler();
+
+
+		private Album new_album;
+		/** The list of albums of displayed by this activity. */
+		public static List<Track> listTrack = new ArrayList<Track>();
+		/** The adapter of the main list view. */
+		public static ArrayAdapter<Track> arrayAdapterTrack = null;
 	
 		
 	@Override
@@ -101,6 +124,7 @@ public class MainActivity extends BaseActivity  {
 		super.onCreate(savedInstanceState);
 		setSlidingActionBarEnabled(true);
 		
+		a = this;
 		
 		if (savedInstanceState != null){
 			contenido = getSupportFragmentManager().getFragment(savedInstanceState, "contenido");
@@ -118,22 +142,28 @@ public class MainActivity extends BaseActivity  {
 		new SessionStore().restore(deezerConnect, this);
 		
 
-		arrayAdapterPlayList = new ArrayAdapter<Playlist>(this, R.layout.thumbnailable_list_item_view, listPlaylist) {
+		arrayAdapterPlayList = new ArrayAdapter<Album>(this, R.layout.thumbnailable_list_item_view, listPlaylist) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				//provide a compund view associated to an artist
-				Playlist playlist= getItem(position);
+				Album playlist= getItem(position);
 				if (convertView == null ) {
 					LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					convertView = vi.inflate(R.layout.thumbnailable_list_item_view, null);
 				}//if
 
 				Drawable thumbnail = thumbFetcher.getThumbnail( playlist ); 
-
+				
+				String url = playlist.getThumbnailUrl();
+				int loader = R.drawable.abs__spinner_48_inner_holo;
+				ImageView image = (ImageView) convertView.findViewById(R.id.imageView1);
+				ImageLoader imgloader= new ImageLoader(getApplicationContext());
+				imgloader.DisplayImage(url, loader, image);
+				
 				TextView nameHolder = (TextView) convertView.findViewById( R.id.t_text_view);
 				nameHolder.setText( playlist.getTitle() );
-				nameHolder.setCompoundDrawablesWithIntrinsicBounds( thumbnail, null, null, null );
+				
 				return convertView;
 			}//met
 
@@ -147,7 +177,7 @@ public class MainActivity extends BaseActivity  {
 				User Amigo= getItem(position);
 				if (convertView == null ) {
 					LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					convertView = vi.inflate(R.layout.thumbnailable_user_item_view, null);
+					convertView = vi.inflate(R.layout.thumbnailable_list_item_view, null);
 				}//if
 
 				Drawable thumbnail = thumbFetcher.getThumbnail( Amigo ); 
@@ -157,13 +187,21 @@ public class MainActivity extends BaseActivity  {
 				if (nombreAmigo.equals("null")){
 					nombreAmigo = "Amigo "+position;
 				}
+				
+				
+				String url = Amigo.getThumbnailUrl();
+				int loader = R.drawable.abs__spinner_48_inner_holo;
+				ImageView image = (ImageView) convertView.findViewById(R.id.imageView1);
+				ImageLoader imgloader= new ImageLoader(getApplicationContext());
+				imgloader.DisplayImage(url, loader, image);
+				
 				nameHolder.setText( nombreAmigo);
-				nameHolder.setCompoundDrawablesWithIntrinsicBounds( thumbnail, null, null, null );
+				
 				return convertView;
 			}//met
 
 		};
-		arrayAdapterTrack = new ArrayAdapter<Track>(this, R.layout.thumbnailable_user_track_view,listTrack){
+		arrayAdapterTrack_recommendation = new ArrayAdapter<Track>(this, R.layout.thumbnailable_user_track_view,listTrack_recommendation){
 			
 			
 
@@ -178,10 +216,10 @@ public class MainActivity extends BaseActivity  {
 				}//if
 			
 				Drawable thumbnail =  thumbFetcher.getThumbnail(track.getArtist());
-				int loader = R.drawable.ic_launcher;
+				
 				TextView nameHolder = (TextView) convertView.findViewById( R.id.t_text_view);
 				TextView autorHolder = (TextView) convertView.findViewById( R.id.t_text_view_autor);
-				ImageView image = (ImageView) convertView.findViewById(R.id.imageView1);
+				
 				nameHolder.setText( track.getTitle());
 				View emocion = new ImageView(getApplicationContext());
 				emocion.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
@@ -195,6 +233,9 @@ public class MainActivity extends BaseActivity  {
 				v.addView(emocion);
 				autorHolder.setText(track.getArtist().getName());
 				String url = track.getArtist().getThumbnailUrl();
+				
+				int loader = R.drawable.abs__spinner_48_inner_holo;
+				ImageView image = (ImageView) convertView.findViewById(R.id.imageView1);
 				ImageLoader imgloader= new ImageLoader(getApplicationContext());
 				imgloader.DisplayImage(url, loader, image);
 				return convertView;
@@ -203,8 +244,42 @@ public class MainActivity extends BaseActivity  {
 		};
 		
 		
+		arrayAdapterArtist = new ArrayAdapter<Artist>(this,
+				R.layout.thumbnailable_list_item_view, listArtist) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				//provide a compund view associated to an artist
+				Artist artist= getItem(position);
+
+				if (convertView == null ) {
+					LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convertView = vi.inflate(R.layout.thumbnailable_list_item_view, null);
+				}//if
+
+				String url = artist.getThumbnailUrl();
+				int loader = R.drawable.abs__spinner_48_inner_holo;
+				ImageView image = (ImageView) convertView.findViewById(R.id.imageView1);
+				ImageLoader imgloader= new ImageLoader(getApplicationContext());
+				imgloader.DisplayImage(url, loader, image);
+				
+				Drawable thumbnail = thumbFetcher.getThumbnail( artist ); 
+				TextView nameHolder = (TextView) convertView.findViewById( R.id.t_text_view);
+				nameHolder.setText( artist.getName() );
+
+
+				return convertView;
+			}//met
+			
+			
+
+		};
+		
+		arrayAdapterTrack = new ArrayAdapter<Track>(this,
+				android.R.layout.simple_list_item_1, listTrack);
+
+		
 	 buscarUsuario();
-	 buscarPlayLists();
 	 buscarAmigos();
 	 buscarCanciones();
 	}
@@ -222,7 +297,7 @@ public class MainActivity extends BaseActivity  {
 		// TODO Auto-generated method stub
 	//	long playlistId = playlist.getId();
 		
-		AsyncDeezerTask buscarTracks = new AsyncDeezerTaskWithDialog(this, BaseActivity.deezerConnect,trackRequesListenertHandler );
+		AsyncDeezerTask buscarTracks = new AsyncDeezerTaskWithDialog(this, BaseActivity.deezerConnect,trackRequesListenertHandler_recommendation );
 		
 		DeezerRequest request = new DeezerRequest("playlist/"+ playlistId+"/tracks");
 		request.setId(String.valueOf(playlistId));
@@ -233,16 +308,13 @@ public class MainActivity extends BaseActivity  {
 	public void busquedaCancionesTerminada(List<Track> listTracks) {
 		// TODO Auto-generated method stub
 		
-		listTrack.clear();
+		listTrack_recommendation.clear();
 		try{
-			listTrack.addAll(listTracks);
-			if(listTrack.isEmpty()){
+			listTrack_recommendation.addAll(listTracks);
+			if(listTrack_recommendation.isEmpty()){
 				Toast.makeText(this, "no hay canciones", Toast.LENGTH_SHORT).show();
 				
-			}else{
-			
-			thumbFetcher.startFetchingThumbnails(listTrack, new ThumbNailFletcherHAndler_Tracks());
-			}arrayAdapterTrack.notifyDataSetChanged();
+			}arrayAdapterTrack_recommendation.notifyDataSetChanged();
 		
 		//	ponerFragments();
 		}
@@ -290,8 +362,6 @@ public class MainActivity extends BaseActivity  {
 			if(listUsers.isEmpty()){
 				Toast.makeText(this, "no tiene amigos xD", Toast.LENGTH_SHORT).show();
 				
-			}else{
-				thumbFetcher.startFetchingThumbnails(listUsers, new ThumbNailFletcherHandler_Users());
 			}
 			arrayAdapterUsers.notifyDataSetChanged();
 		}catch (Exception e){
@@ -300,34 +370,19 @@ public class MainActivity extends BaseActivity  {
 		
 	}
 
+//
+//	private void buscarPlayLists() {
+//		// TODO Auto-generated method stub
+//		
+//		AsyncDeezerTask busquedaPlayListAsyncDeezerTask = new AsyncDeezerTaskWithDialog(this, deezerConnect, playlistRequestListenerHAndler);
+//		DeezerRequest request = new DeezerRequest("user/me/playlists");
+//		busquedaPlayListAsyncDeezerTask.execute(request);
+//		
+//		
+//		
+//	}
 
-	private void buscarPlayLists() {
-		// TODO Auto-generated method stub
-		
-		AsyncDeezerTask busquedaPlayListAsyncDeezerTask = new AsyncDeezerTaskWithDialog(this, deezerConnect, playlistRequestListenerHAndler);
-		DeezerRequest request = new DeezerRequest("user/me/playlists");
-		busquedaPlayListAsyncDeezerTask.execute(request);
-		
-	}
-
-	public void buscarPlayListTerminado(List<Playlist> lisPlaylists_recibidas) {
-		// TODO Auto-generated method stub
-		listPlaylist.clear();
-		
-		try{
-			listPlaylist.addAll(lisPlaylists_recibidas);
-			if(listPlaylist.isEmpty()){
-				Toast.makeText(MainActivity.this,"Sin resultados" , Toast.LENGTH_SHORT).show();
-				
-			}else{
-				thumbFetcher.startFetchingThumbnails(listPlaylist, new ThumbNailFletcherHAndler_PLayList());
-			}arrayAdapterPlayList.notifyDataSetChanged();
-		}catch(Exception e){
-				handleError(e);
-			}
-			
-		
-	}
+	
 	
 //**********************************CLASE de peticiones callback para los usuarios *******************************	
 	private class UserRequestHandler implements RequestListener{
@@ -387,10 +442,10 @@ public class MainActivity extends BaseActivity  {
 		public void onComplete(String respuesta, Object arg1) {
 			// TODO Auto-generated method stub
 			
-			List<Playlist> lisPlaylists = null;
+			List<Album> lisPlaylists = null;
 			
 			try {
-				lisPlaylists = new ListDeezerDataReader<Playlist>(Playlist.class).readList(respuesta);
+				lisPlaylists = new ListDeezerDataReader<Album>(Album.class).readList(respuesta);
 				buscarPlayListTerminado(lisPlaylists);
 				
 			}catch(IllegalStateException exception){
@@ -478,6 +533,84 @@ public class MainActivity extends BaseActivity  {
 		
 	}
 
+//	***************************Clase para busqueda de artista*************
+	private class ArtistSearchRequestHandler implements RequestListener {
+		@Override
+		public void onComplete(String response, Object state) {
+			List<Artist> listArtist = null;
+			try {
+		
+				listArtist = new ListDeezerDataReader<Artist>( Artist.class ).readList( response );
+			
+				artistSearchComplete( listArtist );
+			} catch (IllegalStateException e) {
+				handleError( e );
+				e.printStackTrace();
+			}//catch
+		}//met
+
+		@Override
+		public void onIOException(IOException e, Object state) {
+			handleError( e );			
+		}//met
+
+		@Override
+		public void onMalformedURLException(MalformedURLException e,Object state) {
+			handleError( e );
+		}//met
+
+		@Override
+		public void onOAuthException(OAuthException e, Object state) {
+			handleError( e );
+
+		}//met
+		
+		@Override
+		public void onDeezerError(DeezerError e, Object state) {
+			handleError( e );
+		}//met
+	}//inner class
+	
+	
+	
+	//**********************************************************************************
+	//Clase de busqueda para la lista del album****************************************
+	
+	private class TrackLookupRequestHandler implements RequestListener {
+		@Override
+		public void onComplete(String response, Object state) {
+			List<Track> listTrack = null;
+			try {
+			
+				listTrack = new ListDeezerDataReader<Track>( Track.class ).readList( response );
+				
+				trackSearchComplete(listTrack);
+			} catch (IllegalStateException e) {
+				handleError( e );
+			}//catch
+		}//met
+
+		@Override
+		public void onIOException(IOException e, Object state) {
+			handleError( e );			
+		}//met
+
+		@Override
+		public void onMalformedURLException(MalformedURLException e, Object state) {
+			handleError( e );
+		}//met
+
+		@Override
+		public void onOAuthException(OAuthException e, Object state) {
+			handleError( e );
+	
+		}//met
+
+		@Override
+		public void onDeezerError(DeezerError e, Object state) {
+			handleError( e );
+		}//met
+	}//inner class
 	
 	//Escuchador de la foto miniatura
 	private class ThumbNailFletcherHAndler implements ThumbFetcherListener{
@@ -494,30 +627,7 @@ public class MainActivity extends BaseActivity  {
 		}
 		
 	}
-	//Escuchador fotos miniatura de las listas de reproduccion
-		private class ThumbNailFletcherHAndler_PLayList implements ThumbFetcherListener{
 
-			@Override
-			public void thumbLoaded(Thumbnailable thumbnailable) {
-				// TODO Auto-generated method stub
-				arrayAdapterPlayList.notifyDataSetChanged();
-			}
-			
-		}
-		
-		//Escuchador fotos miniatura para la lista de amigos
-		
-		private class ThumbNailFletcherHandler_Users implements ThumbFetcherListener{
-
-			@Override
-			public void thumbLoaded(Thumbnailable thumbnailable) {
-				// TODO Auto-generated method stub
-				arrayAdapterUsers.notifyDataSetChanged();
-			}
-
-	
-
-		}
 		
 		public void switchContent(Fragment nuevoContenido) {
 			// TODO Auto-generated method stub
@@ -527,6 +637,8 @@ public class MainActivity extends BaseActivity  {
 			getSlidingMenu().showContent();
 			
 		}
+
+	
 
 		public void switchContentAmigos(Fragment nuevoContenido) {
 			// TODO Auto-generated method stub
@@ -582,16 +694,7 @@ public class MainActivity extends BaseActivity  {
 			
 		}
 
-		private class ThumbNailFletcherHAndler_Tracks implements ThumbFetcherListener{
 
-			@Override
-			public void thumbLoaded(Thumbnailable thumbnailable) {
-				// TODO Auto-generated method stub
-				arrayAdapterTrack.notifyDataSetChanged();
-				
-			}
-		
-		}
 		
 		public class TrackFragmentAdapter extends FragmentPagerAdapter{
 
@@ -602,7 +705,7 @@ public class MainActivity extends BaseActivity  {
 				super(fm);
 				// TODO Auto-generated constructor stub
 				listaFragments= new ArrayList<Fragment>();
-				for (Track track: listTrack){
+				for (Track track: listTrack_recommendation){
 					listaFragments.add(new TrackFragment(track));
 				}
 			}
@@ -730,7 +833,118 @@ public class MainActivity extends BaseActivity  {
 			Intent i = new Intent(this, HttpActivity.class);
 			startActivityForResult(i, 0);
 		}
+
+
+
+	
+		@Override
+		public void buscarArtista(String artista) {
+			// TODO Auto-generated method stub
+			
+			
+		
+				AsyncDeezerTask artistSearchTask = new AsyncDeezerTaskWithDialog(this, deezerConnect, artistSearchRequestHandler  );
+				Bundle bundle = new Bundle();
+				bundle.putString( "q", artista );
+				bundle.putString( "nb_items", "30");
+				DeezerRequest request = new DeezerRequest( "search/artist", bundle );
+				request.setId( artista );
+				artistSearchTask.execute( request );
+				
+			
+		}
+
+
+		public void artistSearchComplete(List<Artist> listArtistReceived) {
+			// TODO Auto-generated method stub
+			listArtist.clear();
+
+			try {
+				listArtist.addAll( listArtistReceived );
+				if( listArtist.isEmpty() ) {
+					Toast.makeText( MainActivity.this, getResources().getString( R.string.no_result ), Toast.LENGTH_LONG );
+				} else {
+					//async pick thumb images of artists, will launch event for each downloaded thumb
+		//			thumbFetcher.startFetchingThumbnails(listArtist, new ThumbnailFetcherHandler_artist() );
+					contenido = new ArtistaFragment();
+					getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contenido).addToBackStack("tag").commit();
+				}//else
+				arrayAdapterArtist.notifyDataSetChanged();
+			} catch (Exception exception) {
+				handleError(exception);
+			}//catch
+		}
+
+
+
+		@Override
+		public void buscarlistas(Artist artista) {
+			// TODO Auto-generated method stub
+			long artistId = artista.getId();
+			AsyncDeezerTask albumLookupTask = new AsyncDeezerTaskWithDialog( this, deezerConnect, playlistRequestListenerHAndler );
+			DeezerRequest request = new DeezerRequest( "artist/"+artistId+"/albums" );
+			request.setId( String.valueOf( artistId ) );
+			albumLookupTask.execute( request );
+		}
 		
 		
+		public void buscarPlayListTerminado(List<Album> lisPlaylists_recibidas) {
+			// TODO Auto-generated method stub
+			listPlaylist.clear();
+			
+			try{
+				listPlaylist.addAll(lisPlaylists_recibidas);
+				if(listPlaylist.isEmpty()){
+					Toast.makeText(MainActivity.this,"Sin resultados" , Toast.LENGTH_SHORT).show();
+					
+				}else{
+		//			thumbFetcher.startFetchingThumbnails(listPlaylist, new ThumbNailFletcherHAndler_PLayList());
+					contenido = new AlbumFragment();
+					getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contenido).addToBackStack("tag").commit();
+				
+				}arrayAdapterPlayList.notifyDataSetChanged();
+			}catch(Exception e){
+					handleError(e);
+				}
+				
+			
+		}
+
+
+
+		@Override
+		public void buscarCanciones(Album album) {
+			// TODO Auto-generated method stub
+			new_album = album;
+			long albumId = album.getId();
+			AsyncDeezerTask trackLookupTask = new AsyncDeezerTaskWithDialog(this, deezerConnect, trackLookupRequestHandler );
+			DeezerRequest request = new DeezerRequest( "album/"+albumId+"/tracks");
+			request.setId( String.valueOf( albumId ) );
+			trackLookupTask.execute( request );
+		}
+		
+			
+			private void trackSearchComplete( List<Track> listTrackReceived ) {
+				listTrack.clear();
+				try {
+					listTrack.addAll( listTrackReceived );
+					if( listTrack.isEmpty() ) {
+						Toast.makeText( this, getResources().getString( R.string.no_result ), Toast.LENGTH_LONG );
+					}else{
+						contenido = new TrackAlbumFragment();
+						Bundle bundle = new Bundle();
+						bundle.putLong("albumID", new_album.getId());
+						bundle.putString("albumTittle", new_album.getTitle());
+						bundle.putString("albumUrl", new_album.getCover());
+						contenido.setArguments(bundle);
+						getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contenido).addToBackStack("tag").commit();
+					}
+					arrayAdapterTrack.notifyDataSetChanged();
+				} catch (Exception e) {
+					Toast.makeText( this, getResources().getString( R.string.download_error ), Toast.LENGTH_LONG ).show();
+					e.printStackTrace();
+				}//catch
+			}//me
+
 		
 }

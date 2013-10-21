@@ -47,12 +47,7 @@
             android:name="com.braim.ReproductorActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
-            </intent-filter>
+       
         </activity>
         <activity
             android:name="com.braim.EntrenamientoActivity"

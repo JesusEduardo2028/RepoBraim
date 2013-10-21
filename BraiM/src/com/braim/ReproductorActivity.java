@@ -13,6 +13,7 @@ import java.util.Set;
 
 
 import com.braim.HttpActivity.InterfazClasificacion;
+import com.braim.deezer.data.Album;
 import com.braim.deezer.data.Playlist;
 import com.braim.deezer.data.Thumbnailable;
 import com.braim.deezer.data.Track;
@@ -20,8 +21,12 @@ import com.braim.deezer.io.ListDeezerDataReader;
 import com.braim.deezer.ui.PlayerView;
 import com.braim.deezer.ui.ThumbFetcher;
 import com.braim.deezer.ui.event.ThumbFetcherListener;
+import com.braim.fragments.ListasFragment;
 import com.braim.fragments.MenuSlideFragment;
 import com.braim.fragments.TrackFragment;
+import com.braim.fragments.TrackFragment.InterfazCancion;
+import com.braim.utils.Emocion;
+import com.braim.utils.ImageLoader;
 
 import com.deezer.sdk.AsyncDeezerTask;
 import com.deezer.sdk.DeezerError;
@@ -78,6 +83,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.SlidingDrawer.OnDrawerCloseListener;
 
 import android.widget.ExpandableListView;
@@ -88,18 +94,19 @@ import android.widget.SlidingDrawer;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ReproductorActivity extends FragmentActivity implements OnItemClickListener, OnItemLongClickListener,InterfazClasificacion
+public class ReproductorActivity extends FragmentActivity implements OnItemClickListener, OnItemLongClickListener,InterfazClasificacion,InterfazCancion
 {
 //,BlInterface{
 	
 	public static final String PLAYLIST_ID = "PLAYLIST_ID";
 	public static final String PLAYLIST_TITLE = "PLAYLIST_TITLE";
 	public static final String PLAYLIST_COVER = "PLAYLIST_COVER";
+	public static List<Emocion> listaEmociones = null;
 	public static int back = 0;
 	
 	private RequestListener trackRequesListenertHandler = new trackRequestHandler();
 	private static List<Track> listTrack = new ArrayList<Track>();
-	public static ArrayAdapter<Track>  arrayAdapterTrack = null;
+	
 	
 	private ThumbFetcher thumbFetcher;
 	//Deezer  Player 
@@ -119,6 +126,16 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 	private TextView txtConexion;
 	private TextView txt_arousal;
 	private TextView txt_valence;
+	public static Album album;
+	private Playlist playlist;
+	private Track track;
+	private int contador;
+	
+	private int arousal_p;
+	private int arousal_n;
+	private int valence_p;
+	private int valence_n;
+	
 	public static Activity a;
 	
 	private static String usuario = "null";
@@ -139,7 +156,10 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 	public void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		a = this;
+		
+		listaEmociones = new ArrayList<Emocion>();
+		contador = 1;
+				a = this;
 		HttpActivity.actualizar_interfaz_class();
 		setContentView(R.layout.layout_activity_reproductor);
 		
@@ -157,99 +177,58 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 		
 		ImageView imgAnimacion = (ImageView) findViewById(R.id.animacion_img);
 		animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.animacion3d);
-		
-		animatorSet.setTarget(imgAnimacion);
-	
-		MenuSlideFragment.colocarVista();
-		
-	//	final ListView listaCanciones = (ListView) findViewById(R.id.listView1);
-	//	listaCanciones.setEmptyView(textVacio);
-		 vp = new ViewPager(this);
-		vp.setId("VP".hashCode());
-		
 		ViewGroup layout = (ViewGroup) findViewById(R.id.container_tracks);
-		vp.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
-		layout.addView(vp);
-		
-		arrayAdapterTrack = new ArrayAdapter<Track>(this, R.layout.thumbnailable_user_track_view,listTrack){
-		
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				//provide a compund view associated to an artist
-				
-				Track track = getItem(position);
-				if (convertView == null ) {
-					LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					convertView = vi.inflate(R.layout.thumbnailable_user_track_view, null);
-				}//if
-			
-				Drawable thumbnail =  thumbFetcher.getThumbnail(track.getArtist());
-				
-				TextView nameHolder = (TextView) convertView.findViewById( R.id.t_text_view);
-				nameHolder.setText( track.getArtist().getThumbnailUrl());
-				nameHolder.setCompoundDrawablesWithIntrinsicBounds( thumbnail, null, null, null );
-				return convertView;
-			}//met
-
-		};
-	//	listaCanciones.setAdapter(arrayAdapterTrack);
-		
-	//	listaCanciones.setOnItemClickListener(this);
-	//	listaCanciones.setOnItemLongClickListener(this);
-		
 		playerView = (PlayerView) findViewById(R.id.playerView1);
-	
-		crearReproductor();
-		Drawable imagen_playlist = null;
+		portada_imagen_playlist = (ImageView) findViewById(R.id.imagen_playlist);
+		portada_imagen_playlist.setVisibility(View.GONE);
+		nombre_imagen_playlist = (TextView) findViewById(R.id.nombre_playlist);
+		txtConexion = (TextView) findViewById(R.id.txtConexion);
+		usuario  = getIntent().getStringExtra("user");
+		epocInfo_title = (TextView) findViewById(R.id.epoc_title);
 		
-		//******busqueda  de canciones para mis listas de reproduccion**********///////
-		Playlist playlist = new Playlist();
+		
+		
+
+		if (getIntent().getLongExtra(ReproductorActivity.PLAYLIST_ID, -1) ==-1){
+			
+			album = new Album();
+			album.setId(getIntent().getLongExtra("albumID", 0));
+			album.setTitle(getIntent().getStringExtra("albumTittle"));
+			album.setCoverUrl(getIntent().getStringExtra("albumUrl"));
+			
+		
+			nombre_imagen_playlist.setText(album.getTitle());
+			back =0;
+			buscarCanciones(album);
+			
+		}else{
+			album = null;
+	
+		playlist = new Playlist();
 		playlist.setId(getIntent().getLongExtra(ReproductorActivity.PLAYLIST_ID, -1));
 		playlist.setTitle(getIntent().getStringExtra(ReproductorActivity.PLAYLIST_TITLE));
 		playlist.setPicture(getIntent().getStringExtra(ReproductorActivity.PLAYLIST_COVER));
-		
-		imagen_playlist = thumbFetcher.getThumbnail(playlist);
 	
-
-		portada_imagen_playlist = (ImageView) findViewById(R.id.imagen_playlist);
-		nombre_imagen_playlist = (TextView) findViewById(R.id.nombre_playlist);
 		
-		portada_imagen_playlist.setImageDrawable(imagen_playlist);
 		nombre_imagen_playlist.setText(playlist.getTitle());
-		
-		//Bl configuration
-		epocInfo_title = (TextView) findViewById(R.id.epoc_title);
-
-
-		usuario  = getIntent().getStringExtra("user");
-		txtConexion = (TextView) findViewById(R.id.txtConexion);
-
-        if (comprobarConexion()){
-	//	configurarBlConection();
-        	cambiarInterfazBL();
-	//	animatorSet.cancel();
-        }else{
-        	;
-        	cambiarInterfazBL_Denied();
-    		
-    		 }
-        
-		//	declarar_salida();
-	//	declarar_salida_decryp();
-//        menuDeslizable = (SlidingDrawer) findViewById(R.id.slidingDrawer1);
-//        menuDeslizable.setOnDrawerCloseListener(new OnDrawerCloseListener() {
-//			
-//			@Override
-//			public void onDrawerClosed() {
-//				// TODO Auto-generated method stub
-//				if (btConn!=null){
-//					enviarUsuario();
-//				}
-//			}
-//		});
-		buscarCanciones(playlist);
 		back =0;
-	
+		buscarCanciones(playlist);
+		}
+		MenuSlideFragment.colocarVista();
+		animatorSet.setTarget(imgAnimacion);
+		
+		vp = new ViewPager(this);
+		vp.setId("VP".hashCode());
+		vp.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		layout.addView(vp);
+		crearReproductor();
+
+		
+		if (comprobarConexion()){
+       	cambiarInterfazBL();
+        }else{
+        cambiarInterfazBL_Denied();
+    	}
 	}
 	
 	public void cambiarInterfazBL(){
@@ -265,8 +244,7 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 		
 		epocInfo_title.setText("Sin conexion con servidor, Presione Menu acceder a configuracion");
   		txtConexion.setVisibility(View.VISIBLE);
-//		Intent i = new Intent(this, ConfigurationActivity.class);
-//		startActivityForResult(i, 1);
+
 		
 	}
 
@@ -287,26 +265,24 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 		buscarTracks.execute(request);
 		
 	}
+	private void buscarCanciones (Album album){
+		long albumId = album.getId();
+		AsyncDeezerTask trackLookupTask = new AsyncDeezerTaskWithDialog(this, BaseActivity.deezerConnect, trackRequesListenertHandler );
+		DeezerRequest request = new DeezerRequest( "album/"+albumId+"/tracks");
+		request.setId( String.valueOf( albumId ) );
+		trackLookupTask.execute( request );
+	}
 	
 	public void busquedaCancionesTerminada(List<Track> listTracks) {
-		// TODO Auto-generated method stub
-		
-//		if (comprobarEpoc()){
-//			animatorSet.start();
-//			epocInfo.setText("Datos de llegada Emotiv Epoc");
-//		}else{
-//			epocInfo.setText("No hay ningun Dispositivo Epoc conectado, por favor conectelo y vuelva al menu de Reproduccion");
-//		}
+	
 		listTrack.clear();
 		try{
+	
 			listTrack.addAll(listTracks);
 			if(listTrack.isEmpty()){
 				Toast.makeText(this, "no hay canciones", Toast.LENGTH_SHORT).show();
 				
-			}else{
-			
-			thumbFetcher.startFetchingThumbnails(listTrack, new ThumbNailFletcherHAndler_Tracks());
-			}arrayAdapterTrack.notifyDataSetChanged();
+			}
 			numero_canciones.setText(listTrack.size()+ " canciones");
 			ponerFragments();
 			vp.setCurrentItem(posicion);
@@ -387,7 +363,7 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 
 		 if (player.getPlayerState() != PlayerState.STARTED){
 			player.stop();
-		//	animatorSet.end();
+		
 			
 			}
 		 if (track.hasStream()){
@@ -395,21 +371,21 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 			 
 		 }else{
 			 player.init(track.getId(), track.getPreview());
-		//	 Toast.makeText(this, "Solo puede escuchar 30 segundos", Toast.LENGTH_SHORT).show();
+	
 			sendPause();
-		//		animatorSet.start();
+	
 		 }
-		// playerView.setTrackName(track.getTitle());
+		
 		 playerView.setTrackName(track.getId()+"");
 		 if (track.getArtist() != null){
-		// 	 playerView.setArtistName(track.getArtist().getName());
+
 			 
 		 }else{
-		//	 playerView.setArtistName(null);
+
 			 
 		 }
 		 player.setPlayerProgressInterval(1000);
-	//	 player.play();
+	
 	}
 
 	@Override
@@ -485,16 +461,7 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 		
 	}
 
-	private class ThumbNailFletcherHAndler_Tracks implements ThumbFetcherListener{
 
-		@Override
-		public void thumbLoaded(Thumbnailable thumbnailable) {
-			// TODO Auto-generated method stub
-			arrayAdapterTrack.notifyDataSetChanged();
-			
-		}
-	
-	}
 	
 	public class TrackFragmentAdapter extends FragmentPagerAdapter{
 
@@ -555,69 +522,11 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 			if (comprobarConexion()){
 				enviar("T: "+track);
 			
-		//	btConn.send("U: "+usuario);
-		//	btConn.send("User: "+usuario);		
-			
 			}
 		}catch(Exception e){}
 		
 		}
 	
-	public void desconexionBl(View v){
-//		
-//	btConn.send("End");
-//		
-//	btConn.close();
-//	btConn = null;
-//	ConfigurationActivity.btConn =null;
-	Intent i = getIntent();
-	finish();
-	startActivity(i);
-	}
-	
-	public void entrenar(View v){
-		
-      AlertDialog.Builder builder = new AlertDialog.Builder(this);
-      builder.setMessage("Va a iniciar el entrenamiento: duracion 2 min");
-      builder.setCancelable(false);
-      builder.setPositiveButton("Yes",
-              new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int id) {
-                     Intent i = new Intent(getApplicationContext(),EntrenamientoActivity.class);
-                     startActivity(i);
-                     try {
-                     	if (comprobarConexion()){
-                     		enviar("Train");}
-                     } catch (Exception e) { }
-                     
-                  }
-              });
-      builder.setNegativeButton("No",
-              new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int id) {
-                      dialog.cancel();
-                  }
-              });
-      AlertDialog alertDialog = builder.create();
-      alertDialog.show();
-      
-        
-		
-	}
-	
-	public static void enviarUsuario(){
-		
-
-		try{
-			if (comprobarConexion()){
-				enviar("U: "+usuario);
-			
-	
-			}
-		}catch(Exception e){}
-		
-	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -665,15 +574,47 @@ public class ReproductorActivity extends FragmentActivity implements OnItemClick
 		@Override
 		public void emocionTerminada(String e) {
 			// TODO Auto-generated method stub
+			
+	
+			
 			if (e.equals("emo_pa")){
 				txt_arousal.setText("Arousal : +");
+				arousal_p++;
+				contador++;
 			}else if (e.equals("emo_na")){
 				txt_arousal.setText("Arousal : -");
+				arousal_n++;
+				contador++;
 			}else if ((e.equals("emo_pv"))){
 				txt_valence.setText("Valence : +");
+				valence_p++;
 			}else if ((e.equals("emo_nv"))){
 				txt_valence.setText("Valence : -");
+				valence_n++;
 			}
+			
+			if (contador==5){
+				contador=0;
+				int a = 0;
+				int v = 0;
+				if (arousal_p>arousal_n){
+					a=1;
+				}
+				if (valence_p>valence_n){
+					v=1;
+				}
+							
+				Emocion emocion = new Emocion(a, v,track);
+				listaEmociones.add(emocion);
+			Toast.makeText(this, "Emocion publicada", Toast.LENGTH_LONG).show();	
+			}
+		}
+
+
+		@Override
+		public void actualizarCancion(Track t) {
+			// TODO Auto-generated method stub
+			track = t;
 		}
 
 	

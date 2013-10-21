@@ -2,6 +2,7 @@ package com.braim;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +41,7 @@ public class EntrenamientoActivity extends Activity implements InterfazEntrenami
 	private MediaPlayer iads2;
 	private MediaPlayer iads3;
 	private MediaPlayer iads4;
+	private ProgressDialog progressTraining;
 	private static  Button boton_iniciar;
 	
 	@Override
@@ -52,6 +54,9 @@ public class EntrenamientoActivity extends Activity implements InterfazEntrenami
 		builder.setMessage("Espere mientras se configura el entrenamiento");
     	 mensaje = builder.create();
     	 mensaje.setCancelable(false);
+    	 progressTraining = new ProgressDialog(this);
+    	 progressTraining.setMessage("Espere mientras inicia el entrenamiento");
+    	 progressTraining.setCancelable(false);
     	 
 		cajon1 = (CheckBox) findViewById(R.id.checkBox1);
 		cajon2 = (CheckBox) findViewById(R.id.checkBox2);
@@ -102,7 +107,8 @@ public class EntrenamientoActivity extends Activity implements InterfazEntrenami
 		                  public void onClick(DialogInterface dialog, int id) {
 		                    
 
-		          	    	mensaje.show();
+		          	  //  	mensaje.show();
+		                	  progressTraining.show();
 		          			tarea = new MiTareaAsincrona();
 		          			tarea.execute();
 		          			boton_iniciar.setEnabled(false);
@@ -173,7 +179,8 @@ public class EntrenamientoActivity extends Activity implements InterfazEntrenami
 	        	
 	        }else{
 	        	boton_iniciar.setEnabled(true);
-	        	mensaje.dismiss();
+	       // 	mensaje.dismiss();
+	        	progressTraining.dismiss();
 	        	Toast.makeText(EntrenamientoActivity.this, "No se pudo realizar el entrenamiento",
 	                    Toast.LENGTH_SHORT).show();
 	        HttpActivity.s.Snd_txt_Msg("cancel");  

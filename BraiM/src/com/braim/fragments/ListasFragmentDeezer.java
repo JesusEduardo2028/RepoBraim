@@ -5,6 +5,7 @@ import com.braim.MainActivity;
 import com.braim.ReproductorActivity;
 import com.braim.adapters.ListaAdapter;
 import com.braim.adapters.ListaAdapterDeezer;
+import com.braim.deezer.data.Album;
 import com.braim.deezer.data.Playlist;
 import com.example.pruebasherlock.R;
 
@@ -28,7 +29,7 @@ public class ListasFragmentDeezer extends Fragment {
 	
 	private Activity actividad;
 	private ListaAdapterDeezer adaptador;
-	private ArrayAdapter<Playlist> arrayAdapter;
+	private ArrayAdapter<Album> arrayAdapter;
 	private View view;
 
 	@Override
@@ -63,7 +64,7 @@ public class ListasFragmentDeezer extends Fragment {
 		if (parent != null)
 			parent.removeView(view);
 		}
-		 view = inflater.inflate(R.layout.layout_fragment_playlist_deezer, container,
+		 view = inflater.inflate(R.layout.layout_fragment_album, container,
 				false);
 		
 		ListView listView = (ListView) view.findViewById(R.id.listView1);
@@ -76,7 +77,7 @@ listView.setAdapter(arrayAdapter);
 			public void onItemClick(AdapterView<?> arg0, View v, int listId,
 					long arg3) {
 				// TODO Auto-generated method stub
-				Playlist a  = MainActivity.listPlaylist.get(listId);
+				Album a  = MainActivity.listPlaylist.get(listId);
 				Intent intent  = new Intent(getActivity(), ReproductorActivity.class);
 				intent.putExtra(ReproductorActivity.PLAYLIST_ID, a.getId());
 				intent.putExtra(ReproductorActivity.PLAYLIST_TITLE, a.getTitle());
